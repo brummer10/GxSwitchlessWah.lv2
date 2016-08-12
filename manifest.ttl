@@ -23,4 +23,5 @@
 <http://guitarix.sourceforge.net/plugins/gx_switchless_wah#wah>
     a lv2:Plugin ;
     lv2:binary <gx_switchless_wah.so>  ;
-    rdfs:seeAlso <gx_switchless_wah.ttl> .
+    rdfs:seeAlso <gx_switchless_wah.ttl> ,
+                 <modgui.ttl> .

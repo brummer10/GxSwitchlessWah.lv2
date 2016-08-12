@@ -34,7 +34,7 @@
 all : $(NAME)
 	@mkdir -p ./$(BUNDLE)
 	@cp ./*.ttl ./$(BUNDLE)
-	#@cp -r ./modgui ./$(BUNDLE)
+	@cp -r ./modgui ./$(BUNDLE)
 	@mv ./*.so ./$(BUNDLE)
 	@if [ -f ./$(BUNDLE)/$(NAME).so ]; then echo $(BLUE)"build finish, now run make install"; \
 	else echo $(RED)"sorry, build failed"; fi
