@@ -1,4 +1,4 @@
-	
+
 	# check if user is root
 	user = $(shell whoami)
 	ifeq ($(user),root)
@@ -20,20 +20,21 @@
 	BUNDLE = GxSwitchlessWah.lv2
 	VER = 0.1
 	# set compile flags
-	CXXFLAGS = -I. -O2 -Wall -funroll-loops -ffast-math -fomit-frame-pointer -fstrength-reduce $(SSE_CFLAGS)
-	LDFLAGS = -I. -shared -Llibrary -lc -lm  -fPIC -DPIC  
+	CXXFLAGS += -I. -fPIC -DPIC -O2 -Wall -funroll-loops -ffast-math -fomit-frame-pointer -fstrength-reduce $(SSE_CFLAGS)
+	LDFLAGS += -I. -shared -lm
 	# invoke build files
-	OBJECTS = $(NAME).cpp 
+	OBJECTS = $(NAME).cpp
 	## output style (bash colours)
 	BLUE = "\033[1;34m"
 	RED =  "\033[1;31m"
 	NONE = "\033[0m"
 
-.PHONY : all clean install uninstall 
+.PHONY : all clean install uninstall
 
 all : $(NAME)
 	@mkdir -p ./$(BUNDLE)
 	@cp ./*.ttl ./$(BUNDLE)
+	#@cp -r ./modgui ./$(BUNDLE)
 	@mv ./*.so ./$(BUNDLE)
 	@if [ -f ./$(BUNDLE)/$(NAME).so ]; then echo $(BLUE)"build finish, now run make install"; \
 	else echo $(RED)"sorry, build failed"; fi
@@ -46,7 +47,7 @@ clean :
 
 install : all
 	@mkdir -p $(DESTDIR)$(INSTALL_DIR)/$(BUNDLE)
-	install ./$(BUNDLE)/* $(DESTDIR)$(INSTALL_DIR)/$(BUNDLE)
+	@cp -r ./$(BUNDLE)/* $(DESTDIR)$(INSTALL_DIR)/$(BUNDLE)
 	@echo ". ." $(BLUE)", done"$(NONE)
 
 uninstall :
