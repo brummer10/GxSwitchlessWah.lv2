@@ -23,28 +23,6 @@
 #include <cstring>
 #include <unistd.h>
 
-#ifdef __SSE__
-/* On Intel set FZ (Flush to Zero) and DAZ (Denormals Are Zero)
-   flags to avoid costly denormals */
-#ifdef __SSE3__
-#include <pmmintrin.h>
-inline void AVOIDDENORMALS()
-{
-  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
-  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
-}
-#else
-#include <xmmintrin.h>
-inline void AVOIDDENORMALS()
-{
-  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
-}
-#endif //__SSE3__
-
-#else
-inline void AVOIDDENORMALS() {}
-#endif //__SSE__
-
 #define max(x, y) (((x) > (y)) ? (x) : (y))
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 template <int32_t N> inline float faustpower(float x)
@@ -110,7 +88,6 @@ public:
 
 void GxSwitchLessWah::init_dsp_mono(uint32_t rate, const LV2_Descriptor* descriptor)
 {
-  AVOIDDENORMALS();
   if (strcmp("http://guitarix.sourceforge.net/plugins/gx_switchless_wah#wah",descriptor->URI)== 0)
     {
       _wah = &switchless_wah::run_d;
