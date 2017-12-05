@@ -1,7 +1,7 @@
 	
-	# check if user is root
-	user = $(shell whoami)
-	ifeq ($(user),root)
+	ifneq ($(PREFIX),"")
+	INSTALL_DIR = $(PREFIX)/lib/lv2
+	else ifeq ($(shell whoami),root)
 	INSTALL_DIR = /usr/lib/lv2
 	else 
 	INSTALL_DIR = ~/.lv2
@@ -33,8 +33,9 @@
 	BUNDLE = GxSwitchlessWah.lv2
 	VER = 0.1
 	# set compile flags
-	CXXFLAGS = -I. -O2 -Wall -funroll-loops -ffast-math -fomit-frame-pointer -fstrength-reduce $(SSE_CFLAGS)
-	LDFLAGS = -I. -shared -Llibrary -lc -lm  -fPIC -DPIC  
+	CXXFLAGS ?= -O2 -fomit-frame-pointer
+	CXXFLAGS += -I. -Wall -funroll-loops -ffast-math -fstrength-reduce $(SSE_CFLAGS)
+	LDFLAGS += -I. -shared -Llibrary -lc -lm  -fPIC -DPIC  
 	# invoke build files
 	OBJECTS = $(NAME).cpp 
 	## output style (bash colours)
