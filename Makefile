@@ -52,7 +52,7 @@ all : clean check $(NAME)
 
 mod : clean $(NAME)
 	@mkdir -p ./$(BUNDLE)
-	@cp -r ./MOD/* ./$(BUNDLE)
+	@cp -R ./MOD/* ./$(BUNDLE)
 	@mv ./*.so ./$(BUNDLE)
 	@if [ -f ./$(BUNDLE)/$(NAME).so ]; then echo $(BLUE)"build finish, now run make install"; \
 	else echo $(RED)"sorry, build failed"; fi
@@ -69,10 +69,14 @@ clean :
 	@rm -rf ./$(BUNDLE)
 	@echo ". ." $(BLUE)", done"$(NONE)
 
-install : all
+install :
+ifneq ("$(wildcard ./$(BUNDLE))","")
 	@mkdir -p $(DESTDIR)$(INSTALL_DIR)/$(BUNDLE)
 	@cp -r ./$(BUNDLE)/* $(DESTDIR)$(INSTALL_DIR)/$(BUNDLE)
 	@echo ". ." $(BLUE)", done"$(NONE)
+else
+	@echo ". ." $(BLUE)", you must build first"$(NONE)
+endif
 
 uninstall :
 	@rm -rf $(INSTALL_DIR)/$(BUNDLE)
