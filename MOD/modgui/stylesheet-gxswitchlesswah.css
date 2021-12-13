@@ -11,7 +11,7 @@
     position:absolute;
     width:230px;
     border-radius: 18px;
-    border-radius: 50px 52px 50px 52px;
+    border-radius: 80px 82px 80px 82px;
 }
 
 /* = BACKGROUND IMAGES - Colour of the pedal
@@ -34,7 +34,7 @@
     position:absolute;
     right:30px;
     text-align:center;
-    top:350px;
+    top:340px;
 }
 
 .mod-pedal-british{{{cns}}} .mod-plugin-brand h1 {
