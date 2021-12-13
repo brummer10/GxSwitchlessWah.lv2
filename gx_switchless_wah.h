@@ -34,6 +34,8 @@ typedef enum
   WAH,
   ATTACK,
   RELEASE,
+  MINLEVEL,
+  MAXLEVEL,
 } EffectPortIndex;
 
 #endif //SRC_HEADERS_GXSWITCHLESSWAH_H_

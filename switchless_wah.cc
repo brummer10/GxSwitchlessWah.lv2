@@ -47,6 +47,10 @@ private:
 	double 	faRec1;
 	double 	faslider2_[2];
 	int 	iSlow2;
+	float 	*faslider3_;
+	float 	faslider3;
+	float 	*faslider4_;
+	float 	faslider4;
 public:
     void clear_state_fd();
 	void init_d(uint32_t samplingFreq);
@@ -87,6 +91,12 @@ void switchless_wah::connect_d(uint32_t port,void* data)
     case RELEASE:
       faslider1_ = (float*)data;
       break;
+    case MINLEVEL:
+      faslider3_ = (float*)data;
+      break;
+    case MAXLEVEL:
+      faslider4_ = (float*)data;
+      break;
     default:
       break;
     }
@@ -116,6 +126,8 @@ inline void switchless_wah::run_d(uint32_t count, float *input0, float *output0)
     fslider0 = (*fslider0_);
     faslider0 = (*faslider0_);
     faslider1 = (*faslider1_);
+    faslider3 = (*faslider3_);
+    faslider4 = (*faslider4_);
 	double 	fSlow0 = fslider0;
 	double 	fSlow1 = (fConst1 * (0 - ((1.0 / ((fSlow0 * (0.270546 + (fSlow0 * ((fSlow0 * (3.64419 + (fSlow0 * ((2.85511 * fSlow0) - 5.20364)))) - 0.86331)))) - 0.814203)) + 0.933975)));
 	double 	fSlow2 = (1973.48 - (1000 / ((fSlow0 * (1.9841 + (fSlow0 * (5.76598 + (fSlow0 * ((fSlow0 * (49.9836 + (fSlow0 * ((12.499 * fSlow0) - 40.3658)))) - 28.3434)))))) - 1.6086)));
@@ -130,9 +142,9 @@ inline void switchless_wah::run_d(uint32_t count, float *input0, float *output0)
 		float fTemp1 = input0[i];
 		iSlow2 = ((fabs(faslider2_[0] - fSlow0)>1.0e-6)? 1:0);
 		faslider2_[0] = (faslider2_[1] * 0.993) + faSlow2;
-		((iSlow2)?
-		faRec0[0] = min((double)1, ((faRec0[1]) + faSlow0)):
-		faRec0[0] = max((double)0, ((faRec0[1]) + faSlow1))); //wet
+		((iSlow2) || (faslider3 < fslider0 && !(faslider4 < fslider0)) ?
+			faRec0[0] = min((double)1, ((faRec0[1]) + faSlow0)):
+			faRec0[0] = max((double)0, ((faRec0[1]) + faSlow1))); //wet
 		faRec1 = 1.0 - faRec0[0]; //dry
 
 		fRec1[0] = (fSlow1 + (0.993 * fRec1[1]));

@@ -1,7 +1,5 @@
-	
-	ifneq ($(PREFIX),"")
-	INSTALL_DIR = $(PREFIX)/lib/lv2
-	else ifeq ($(shell whoami),root)
+
+	ifeq ($(shell whoami),root)
 	INSTALL_DIR = /usr/lib/lv2
 	else 
 	INSTALL_DIR = ~/.lv2
@@ -33,11 +31,10 @@
 	BUNDLE = GxSwitchlessWah.lv2
 	VER = 0.1
 	# set compile flags
-	CXXFLAGS ?= -O2 -fomit-frame-pointer
-	CXXFLAGS += -I. -Wall -funroll-loops -ffast-math -fstrength-reduce $(SSE_CFLAGS)
-	LDFLAGS += -I. -shared -Llibrary -lc -lm  -fPIC -DPIC  
+	CXXFLAGS += -I. -fPIC -DPIC -O2 -Wall -funroll-loops -ffast-math -fomit-frame-pointer -fstrength-reduce $(SSE_CFLAGS)
+	LDFLAGS += -I. -shared -Llibrary -lm 
 	# invoke build files
-	OBJECTS = $(NAME).cpp 
+	OBJECTS = $(NAME).cpp
 	## output style (bash colours)
 	BLUE = "\033[1;34m"
 	RED =  "\033[1;31m"
@@ -45,9 +42,17 @@
 
 .PHONY : all clean install uninstall 
 
-all : check $(NAME)
+all : clean check $(NAME)
 	@mkdir -p ./$(BUNDLE)
 	@cp ./*.ttl ./$(BUNDLE)
+	@mv ./*.so ./$(BUNDLE)
+	@if [ -f ./$(BUNDLE)/$(NAME).so ]; then echo $(BLUE)"build finish, now run make install"; \
+	else echo $(RED)"sorry, build failed"; fi
+	@echo $(NONE)
+
+mod : clean $(NAME)
+	@mkdir -p ./$(BUNDLE)
+	@cp -r ./MOD/* ./$(BUNDLE)
 	@mv ./*.so ./$(BUNDLE)
 	@if [ -f ./$(BUNDLE)/$(NAME).so ]; then echo $(BLUE)"build finish, now run make install"; \
 	else echo $(RED)"sorry, build failed"; fi
@@ -66,7 +71,7 @@ clean :
 
 install : all
 	@mkdir -p $(DESTDIR)$(INSTALL_DIR)/$(BUNDLE)
-	install ./$(BUNDLE)/* $(DESTDIR)$(INSTALL_DIR)/$(BUNDLE)
+	@cp -r ./$(BUNDLE)/* $(DESTDIR)$(INSTALL_DIR)/$(BUNDLE)
 	@echo ". ." $(BLUE)", done"$(NONE)
 
 uninstall :
