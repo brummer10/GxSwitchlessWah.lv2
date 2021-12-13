@@ -40,7 +40,7 @@
 	RED =  "\033[1;31m"
 	NONE = "\033[0m"
 
-.PHONY : all clean install uninstall 
+.PHONY : all mod clean install uninstall 
 
 all : clean check $(NAME)
 	@mkdir -p ./$(BUNDLE)
