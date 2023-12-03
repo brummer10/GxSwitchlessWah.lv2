@@ -31,30 +31,75 @@
 	BUNDLE = GxSwitchlessWah.lv2
 	VER = 0.1
 	# set compile flags
-	CXXFLAGS += -I. -fPIC -DPIC -O2 -Wall -funroll-loops -ffast-math -fomit-frame-pointer -fstrength-reduce $(SSE_CFLAGS)
-	LDFLAGS += -I. -shared -Llibrary -lm 
+	CXXFLAGS += -I. -fPIC -DPIC -O2 -Wall -funroll-loops -ffast-math -fomit-frame-pointer \
+	 -fstrength-reduce $(ABI_CXXFLAGS) $(SSE_CFLAGS)
+	LDFLAGS += -I. -shared $(ABI_LDFLAGS) -Llibrary -lm 
 	# invoke build files
 	OBJECTS = $(NAME).cpp
 	## output style (bash colours)
 	BLUE = "\033[1;34m"
 	RED =  "\033[1;31m"
 	NONE = "\033[0m"
+	# check OS specific stuff
+	OS := $(shell echo $$OS)
+	UNAME_S := $(shell uname -s)
+	# default library extension
+	LIB_EXT = so
+	# cross compilation (e.g.: PKG_CONFIG_PATH=/usr/local/pkgconfig make CROSS=x86_64-w64-mingw32- mod)
+	ifneq (,$(findstring mingw,$(CROSS)))
+		# Found
+		TARGET = Windows
+		STRIP = $(CROSS)strip
+		PKGCONFIG = $(CROSS)pkg-config
+		CC = $(CROSS)cc
+		CXX = $(CROSS)g++
+		LD = $(CROSS)ld
+	else ifneq (,$(findstring mingw,$(CXX)))
+		# Found
+		TARGET = Windows
+	else
+		# Not found
+		ifeq ($(UNAME_S), Linux) #LINUX
+			TARGET = Linux
+		endif
+		ifeq ($(OS), Windows_NT) #WINDOWS
+			TARGET = Windows
+		endif
+		ifeq ($(UNAME_S), Darwin) #APPLE
+			TARGET = Apple
+		endif
+	endif
+	ifeq ($(TARGET), Linux)
+		ABI_CFLAGS = -Wl,-z,nodelete
+		ABI_CXXFLAGS = -Wl,-z,relro,-z,now
+		ABI_LDFLAGS = -Wl,-z,noexecstack
+	endif
+	ifeq ($(TARGET), Windows)
+		ECHO += -e
+		ABI_LDFLAGS = -static -lpthread
+		GUI_LIBS = -liconv -lstdc++
+		PKGCONFIG_FLAGS = --static
+		TTLUPDATE = sed -i '/lv2:binary/ s/\.so/\.dll/ ' $(BUNDLE)/manifest.ttl
+		LIB_EXT = dll
+	endif
 
 .PHONY : mod all clean install uninstall 
 
 all : clean check $(NAME)
 	@mkdir -p ./$(BUNDLE)
 	@cp ./*.ttl ./$(BUNDLE)
-	@mv ./*.so ./$(BUNDLE)
-	@if [ -f ./$(BUNDLE)/$(NAME).so ]; then echo $(BLUE)"build finish, now run make install"; \
+	@mv ./*.$(LIB_EXT) ./$(BUNDLE)
+	$(TTLUPDATE)
+	@if [ -f ./$(BUNDLE)/$(NAME).$(LIB_EXT) ]; then echo $(BLUE)"build finish, now run make install"; \
 	else echo $(RED)"sorry, build failed"; fi
 	@echo $(NONE)
 
 mod : clean $(NAME)
 	@mkdir -p ./$(BUNDLE)
 	@cp -R ./MOD/* ./$(BUNDLE)
-	@mv ./*.so ./$(BUNDLE)
-	@if [ -f ./$(BUNDLE)/$(NAME).so ]; then echo $(BLUE)"build finish, now run make install"; \
+	@mv ./*.$(LIB_EXT) ./$(BUNDLE)
+	$(TTLUPDATE)
+	@if [ -f ./$(BUNDLE)/$(NAME).$(LIB_EXT) ]; then echo $(BLUE)"build finish, now run make install"; \
 	else echo $(RED)"sorry, build failed"; fi
 	@echo $(NONE)
 
@@ -65,7 +110,7 @@ ifdef ARMCPU
 endif
 
 clean :
-	@rm -f $(NAME).so
+	@rm -f $(NAME).$(LIB_EXT)
 	@rm -rf ./$(BUNDLE)
 	@echo ". ." $(BLUE)", done"$(NONE)
 
@@ -83,4 +128,4 @@ uninstall :
 	@echo ". ." $(BLUE)", done"$(NONE)
 
 $(NAME) :
-	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS) -o $(NAME).so
+	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS) -o $(NAME).$(LIB_EXT)
